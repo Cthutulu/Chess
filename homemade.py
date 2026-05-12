@@ -3,6 +3,8 @@ Some example classes for people who want to create a homemade bot.
 
 With these classes, bot makers will not have to implement the UCI or XBoard interfaces themselves.
 """
+from inspect import AGEN_RUNNING
+
 import chess
 from chess.engine import PlayResult, Limit
 import random
@@ -27,3 +29,8 @@ class RandomMove(ExampleEngine):
     def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:  # noqa: ARG002
         """Choose a random move."""
         return PlayResult(random.choice(list(board.legal_moves)), None)
+
+class AgressiveMove(ExampleEngine):
+    """Take enemy piece when possible"""
+
+
