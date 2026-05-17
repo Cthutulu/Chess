@@ -33,4 +33,21 @@ class RandomMove(ExampleEngine):
 class AgressiveMove(ExampleEngine):
     """Take enemy piece when possible"""
 
+    def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
 
+        legal_moves = list(board.legal_moves)
+
+        capture_moves = []
+
+        for move in legal_moves:
+            if board.is_capture(move):
+                capture_moves.append(move)
+
+        if capture_moves:
+            chosen_move = random.choice(capture_moves)
+            logger.info(f"Aggressive move played: {chosen_move}")
+            return PlayResult(chosen_move, None)
+
+        chosen_move = random.choice(legal_moves)
+        logger.info(f"Random move played: {chosen_move}")
+        return PlayResult(chosen_move, None)
