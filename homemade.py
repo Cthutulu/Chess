@@ -51,3 +51,78 @@ class AgressiveMove(ExampleEngine):
         chosen_move = random.choice(legal_moves)
         logger.info(f"Random move played: {chosen_move}")
         return PlayResult(chosen_move, None)
+
+
+class CheckAgressiveMove(ExampleEngine):
+    """Value Check & Take pieces highest
+       then value check
+       then value take piece
+    """
+
+
+    def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
+
+        legal_moves = list(board.legal_moves)
+
+        capture_moves = []
+        check_moves = []
+
+        for move in legal_moves:
+            if board.gives_check(move) and board.is_capture(move):
+                capture_moves.append(move)
+            elif board.gives_check(move):
+                check_moves.append(move)
+            elif board.is_capture(move):
+                capture_moves.append(move)
+
+        if check_moves:
+            chosen_move = random.choice(check_moves)
+            logger.info(f"Check move played: {chosen_move}")
+            return PlayResult(chosen_move, None)
+
+        elif capture_moves:
+            chosen_move = random.choice(capture_moves)
+            logger.info(f"Aggressive move played: {chosen_move}")
+            return PlayResult(chosen_move, None)
+
+        chosen_move = random.choice(legal_moves)
+        logger.info(f"Random move played: {chosen_move}")
+        return PlayResult(chosen_move, None)
+
+
+class AgressiveCheckMove(ExampleEngine):
+    """Value Check & Take pieces highest
+       then value take piece
+       then value check
+    """
+
+    def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
+
+        legal_moves = list(board.legal_moves)
+
+        capture_moves = []
+        check_moves = []
+
+        for move in legal_moves:
+            if board.gives_check(move) and board.is_capture(move):
+                capture_moves.append(move)
+            elif board.is_capture(move):
+                capture_moves.append(move)
+            elif board.gives_check(move):
+                check_moves.append(move)
+
+        if capture_moves:
+            chosen_move = random.choice(capture_moves)
+            logger.info(f"Aggressive move played: {chosen_move}")
+            return PlayResult(chosen_move, None)
+
+        elif check_moves:
+            chosen_move = random.choice(check_moves)
+            logger.info(f"Check move played: {chosen_move}")
+            return PlayResult(chosen_move, None)
+
+        chosen_move = random.choice(legal_moves)
+        logger.info(f"Random move played: {chosen_move}")
+        return PlayResult(chosen_move, None)
+
+#     set
