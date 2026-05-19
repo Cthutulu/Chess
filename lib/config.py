@@ -91,7 +91,7 @@ def check_config_section(config: CONFIG_DICT_TYPE, data_name: str, data_type: ty
     type_error_message: dict[type, str] = {
         str: f"{data_location} must be a string wrapped in quotes.",
         dict: f"{data_location} must be a dictionary with indented keys followed by colons."}
-    config_assert(data_name in config_part, f"Your config.yml does not have required {sub}section `{data_name}`.")
+    config_assert(data_name in config_part, f"Your config-bot1.yml does not have required {sub}section `{data_name}`.")
     config_assert(isinstance(config_part[data_name], data_type), type_error_message[data_type])
 
 
@@ -426,14 +426,14 @@ def load_config(config_file: str) -> Configuration:
     """
     Read the config.
 
-    :param config_file: The filename of the config (usually `config.yml`).
+    :param config_file: The filename of the config (usually `config-bot1.yml`).
     :return: A `Configuration` object containing the config.
     """
     with open(config_file) as stream:
         try:
             CONFIG = yaml.safe_load(stream)
         except Exception:
-            logger.exception("There appears to be a syntax problem with your config.yml")
+            logger.exception("There appears to be a syntax problem with your config-bot1.yml")
             raise
 
     log_config(CONFIG)

@@ -57,7 +57,7 @@ class MockLichess(Lichess):
 
 def get_configs() -> tuple[Configuration, Configuration, Configuration, Configuration]:
     """Create the configs used for the tests."""
-    with open("./config.yml.default") as file:
+    with open("./config-bot1.yml.default") as file:
         CONFIG = yaml.safe_load(file)
     insert_default_values(CONFIG)
     CONFIG["engine"]["online_moves"]["lichess_cloud_analysis"]["enabled"] = True

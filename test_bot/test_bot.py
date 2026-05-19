@@ -121,7 +121,7 @@ def run_bot(raw_config: CONFIG_DICT_TYPE, logging_level: int) -> bool:
 
 def test_uci() -> None:
     """Test lichess-bot with Stockfish (UCI)."""
-    with open("./config.yml.default") as file:
+    with open("./config-bot1.yml.default") as file:
         CONFIG = yaml.safe_load(file)
 
     with tempfile.TemporaryDirectory() as temp:
@@ -141,7 +141,7 @@ def test_uci() -> None:
 
 def test_xboard() -> None:
     """Test lichess-bot with an XBoard engine."""
-    with open("./config.yml.default") as file:
+    with open("./config-bot1.yml.default") as file:
         CONFIG = yaml.safe_load(file)
 
     with tempfile.TemporaryDirectory() as temp:
@@ -161,7 +161,7 @@ def test_xboard() -> None:
 
 def test_homemade() -> None:
     """Test lichess-bot with a homemade engine."""
-    with open("./config.yml.default") as file:
+    with open("./config-bot1.yml.default") as file:
         CONFIG = yaml.safe_load(file)
 
     with tempfile.TemporaryDirectory() as temp:
@@ -179,7 +179,7 @@ def test_homemade() -> None:
 
 def test_buggy_engine() -> None:
     """Test lichess-bot with an engine that causes a timeout error within python-chess."""
-    with open("./config.yml.default") as file:
+    with open("./config-bot1.yml.default") as file:
         CONFIG = yaml.safe_load(file)
 
     with tempfile.TemporaryDirectory() as temp:

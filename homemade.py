@@ -64,27 +64,31 @@ class CheckAgressiveMove(ExampleEngine):
 
         legal_moves = list(board.legal_moves)
 
-        capture_moves = []
-        check_moves = []
+        capture_moves = {move for move in legal_moves if board.is_capture(move)}
 
-        for move in legal_moves:
-            if board.gives_check(move) and board.is_capture(move):
-                capture_moves.append(move)
-            elif board.gives_check(move):
-                check_moves.append(move)
-            elif board.is_capture(move):
-                capture_moves.append(move)
+        check_moves = {move for move in legal_moves if board.gives_check(move)}
 
-        if check_moves:
-            chosen_move = random.choice(check_moves)
+        capture_check_moves = capture_moves & check_moves
+
+        # Priority 1: Capture + Check
+        if capture_check_moves:
+            chosen_move = random.choice(list(capture_check_moves))
+            logger.info(f"Capture + Check move played: {chosen_move}")
+            return PlayResult(chosen_move, None)
+
+        # Priority 2: Check
+        elif check_moves:
+            chosen_move = random.choice(list(check_moves))
             logger.info(f"Check move played: {chosen_move}")
             return PlayResult(chosen_move, None)
 
+        # Priority 3: Capture
         elif capture_moves:
-            chosen_move = random.choice(capture_moves)
-            logger.info(f"Aggressive move played: {chosen_move}")
+            chosen_move = random.choice(list(capture_moves))
+            logger.info(f"Capture move played: {chosen_move}")
             return PlayResult(chosen_move, None)
 
+        # Priority 4: Random
         chosen_move = random.choice(legal_moves)
         logger.info(f"Random move played: {chosen_move}")
         return PlayResult(chosen_move, None)
@@ -100,29 +104,31 @@ class AgressiveCheckMove(ExampleEngine):
 
         legal_moves = list(board.legal_moves)
 
-        capture_moves = []
-        check_moves = []
+        capture_moves = {move for move in legal_moves if board.is_capture(move)}
 
-        for move in legal_moves:
-            if board.gives_check(move) and board.is_capture(move):
-                capture_moves.append(move)
-            elif board.is_capture(move):
-                capture_moves.append(move)
-            elif board.gives_check(move):
-                check_moves.append(move)
+        check_moves = {move for move in legal_moves if board.gives_check(move)}
 
-        if capture_moves:
-            chosen_move = random.choice(capture_moves)
-            logger.info(f"Aggressive move played: {chosen_move}")
+        capture_check_moves = capture_moves & check_moves
+
+        # Priority 1: Capture + Check
+        if capture_check_moves:
+            chosen_move = random.choice(list(capture_check_moves))
+            logger.info(f"Capture + Check move played: {chosen_move}")
             return PlayResult(chosen_move, None)
 
+        # Priority 2: Capture
+        elif capture_moves:
+            chosen_move = random.choice(list(capture_moves))
+            logger.info(f"Capture move played: {chosen_move}")
+            return PlayResult(chosen_move, None)
+
+        # Priority 3: Check
         elif check_moves:
-            chosen_move = random.choice(check_moves)
+            chosen_move = random.choice(list(check_moves))
             logger.info(f"Check move played: {chosen_move}")
             return PlayResult(chosen_move, None)
 
+        # Priority 4: Random
         chosen_move = random.choice(legal_moves)
         logger.info(f"Random move played: {chosen_move}")
         return PlayResult(chosen_move, None)
-
-#     set

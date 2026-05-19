@@ -37,7 +37,7 @@ def test_challenge() -> None:
                                                "import": 0, "me": 0},
                                      "followable": True, "following": False, "blocking": False}
 
-    with open("./config.yml.default") as file:
+    with open("./config-bot1.yml.default") as file:
         CONFIG = yaml.safe_load(file)
     CONFIG["token"] = ""
     CONFIG["challenge"]["allow_list"] = []
@@ -80,7 +80,7 @@ def test_challenge_rating_filters() -> None:
                                      "perfs": {"bullet": {"games": 100, "rating": 3000, "rd": 150, "prog": -10}},
                                      "title": "BOT"}
 
-    with open("./config.yml.default") as file:
+    with open("./config-bot1.yml.default") as file:
         CONFIG = yaml.safe_load(file)
     CONFIG["token"] = ""
     CONFIG["challenge"]["allow_list"] = []
