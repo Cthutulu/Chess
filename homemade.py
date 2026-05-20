@@ -132,3 +132,69 @@ class AgressiveCheckMove(ExampleEngine):
         chosen_move = random.choice(legal_moves)
         logger.info(f"Random move played: {chosen_move}")
         return PlayResult(chosen_move, None)
+
+
+class SmartAggressiveMove(ExampleEngine):
+    """Prioritize valuable captures and checks."""
+
+    def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
+
+        legal_moves = list(board.legal_moves)
+
+        piece_values = {
+            chess.PAWN: 1,
+            chess.KNIGHT: 3,
+            chess.BISHOP: 3,
+            chess.ROOK: 5,
+            chess.QUEEN: 9
+        }
+
+        capture_moves = {move for move in legal_moves if board.is_capture(move)}
+
+        check_moves = {move for move in legal_moves if board.gives_check(move)}
+
+        capture_check_moves = capture_moves & check_moves
+
+        def best_capture(moves):
+
+            best_move = None
+            best_value = 0
+
+            for move in moves:
+
+                captured_piece = board.piece_at(move.to_square)
+
+                if captured_piece:
+
+                    value = piece_values[captured_piece.piece_type]
+
+                    if value > best_value:
+                        best_value = value
+                        best_move = move
+
+            return best_move
+
+        # Priority 1: Capture + Check
+        best_move = best_capture(capture_check_moves)
+
+        if best_move:
+            logger.info(f"Capture + Check move played: {best_move}")
+            return PlayResult(best_move, None)
+
+        # Priority 2: Capture
+        best_move = best_capture(capture_moves)
+
+        if best_move:
+            logger.info(f"Capture move played: {best_move}")
+            return PlayResult(best_move, None)
+
+        # Priority 3: Check
+        if check_moves:
+            chosen_move = random.choice(list(check_moves))
+            logger.info(f"Check move played: {chosen_move}")
+            return PlayResult(chosen_move, None)
+
+        # Priority 4: Random
+        chosen_move = random.choice(legal_moves)
+        logger.info(f"Random move played: {chosen_move}")
+        return PlayResult(chosen_move, None)
