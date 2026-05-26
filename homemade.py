@@ -22,14 +22,16 @@ logger = logging.getLogger(__name__)
 class ExampleEngine(MinimalEngine):
     """An example engine that all homemade engines inherit."""
 
-
+# region RandomMove
 class RandomMove(ExampleEngine):
     """Get a random move."""
 
     def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:  # noqa: ARG002
         """Choose a random move."""
         return PlayResult(random.choice(list(board.legal_moves)), None)
+# endregion RandomMove
 
+# region AgressiveMove
 class AgressiveMove(ExampleEngine):
     """Take enemy piece when possible"""
 
@@ -51,8 +53,9 @@ class AgressiveMove(ExampleEngine):
         chosen_move = random.choice(legal_moves)
         logger.info(f"Random move played: {chosen_move}")
         return PlayResult(chosen_move, None)
+# endregion AgressiveMove
 
-
+# region CheckAgressiveMove
 class CheckAgressiveMove(ExampleEngine):
     """Value Check & Take pieces highest
        then value check
@@ -92,8 +95,9 @@ class CheckAgressiveMove(ExampleEngine):
         chosen_move = random.choice(legal_moves)
         logger.info(f"Random move played: {chosen_move}")
         return PlayResult(chosen_move, None)
+#  endregion CheckAgressiveMove
 
-
+# region AgressiveCheckMove
 class AgressiveCheckMove(ExampleEngine):
     """Value Check & Take pieces highest
        then value take piece
@@ -132,6 +136,7 @@ class AgressiveCheckMove(ExampleEngine):
         chosen_move = random.choice(legal_moves)
         logger.info(f"Random move played: {chosen_move}")
         return PlayResult(chosen_move, None)
+# endregion AgressiveCheckMove
 
 
 class SmartAggressiveMove(ExampleEngine):
@@ -198,3 +203,41 @@ class SmartAggressiveMove(ExampleEngine):
         chosen_move = random.choice(legal_moves)
         logger.info(f"Random move played: {chosen_move}")
         return PlayResult(chosen_move, None)
+
+
+class EvaluationTest1(ExampleEngine):
+    """Simple evaluation with piece score:
+       Possetive for White, Negative for Black
+       Simple evaluation will mean try every legal move.
+       And evaluate the board to see which one was best.
+    """
+    piece_values = {
+        chess.PAWN: 1,
+        chess.KNIGHT: 3,
+        chess.BISHOP: 3,
+        chess.ROOK: 5,
+        chess.QUEEN: 9
+    }
+
+    def evaluate_board(self, board: chess.Board):
+
+        score = 0
+
+        for piece_type in self.piece_values:
+
+            value = self.piece_values[piece_type]
+
+            #White possetive:
+            score += len(board.pieces(piece_type, chess.WHITE)) * value
+
+            #Black negative:
+            score -= len(board.pieces(piece_type, chess.BLACK)) * value
+
+
+
+"""
+hello gpt i need some help, im coding a chess bot for a school project, right now my bot is fairly dumb, (because im early into the progress) i need to find a way to make it smarter, let me first show you my code, and then my ideas, and then you can give me your input.
+"""
+"""
+as you can see so far my bot only really know how to capture pieces, check and random moves. but it knows no positioning and evaluation. my idea was to have it somehow make every move, and see what would be the "best" (not really the best yet, but just a decent move at least), and evaluate it using a simple evaluation, such as piece score
+"""
