@@ -259,4 +259,3 @@ class EvaluationTest1(ExampleEngine):
         logger.info(f"Best move: {best_move}, Score: {best_score}")
 
         return PlayResult(best_move, None)
-
