@@ -233,11 +233,30 @@ class EvaluationTest1(ExampleEngine):
             #Black negative:
             score -= len(board.pieces(piece_type, chess.BLACK)) * value
 
+        return score
 
+    def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
 
-"""
-hello gpt i need some help, im coding a chess bot for a school project, right now my bot is fairly dumb, (because im early into the progress) i need to find a way to make it smarter, let me first show you my code, and then my ideas, and then you can give me your input.
-"""
-"""
-as you can see so far my bot only really know how to capture pieces, check and random moves. but it knows no positioning and evaluation. my idea was to have it somehow make every move, and see what would be the "best" (not really the best yet, but just a decent move at least), and evaluate it using a simple evaluation, such as piece score
-"""
+        legal_moves = list(board.legal_moves)
+
+        best_move = None
+
+        best_score = -999
+
+        for move in legal_moves:
+
+            board.push(move)
+            score = self.evaluate_board(board)
+            board.pop()
+
+            if board.turn == chess.BLACK:
+                score = -score
+
+            if score > best_score:
+                best_score = score
+                best_move = move
+
+        logger.info(f"Best move: {best_move}, Score: {best_score}")
+
+        return PlayResult(best_move, None)
+
