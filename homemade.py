@@ -11,6 +11,8 @@ import random
 from lib.engine_wrapper import MinimalEngine
 from lib.lichess_types import MOVE, HOMEMADE_ARGS_TYPE
 import logging
+import time
+
 
 
 # Use this logger variable to print messages to the console or log files.
@@ -241,7 +243,10 @@ class EvaluationTest1(ExampleEngine):
 
         best_move = None
 
-        best_score = -999
+        if board.turn == chess.WHITE:
+            best_score = -999
+        else:
+            best_score = 999
 
         for move in legal_moves:
 
@@ -249,13 +254,140 @@ class EvaluationTest1(ExampleEngine):
             score = self.evaluate_board(board)
             board.pop()
 
-            if board.turn == chess.BLACK:
-                score = -score
+            if board.turn == chess.WHITE:
 
-            if score > best_score:
-                best_score = score
-                best_move = move
+                if score > best_score:
+                    best_score = score
+                    best_move = move
+
+            else:
+
+                if score < best_score:
+                    best_score = score
+                    best_move = move
 
         logger.info(f"Best move: {best_move}, Score: {best_score}")
 
         return PlayResult(best_move, None)
+
+
+class EvaluationTest2(ExampleEngine):
+    """
+    Simple chess bot using:
+    - Material evaluation
+    - Minimax search
+    - 3-ply lookahead
+
+    Sequence:
+    Your move -> Enemy move -> Your move -> Evaluate
+    """
+
+    piece_values = {
+        chess.PAWN: 1,
+        chess.KNIGHT: 3,
+        chess.BISHOP: 3,
+        chess.ROOK: 5,
+        chess.QUEEN: 9
+    }
+
+    def evaluate_board(self, board: chess.Board):
+
+        score = 0
+
+        for piece_type, value in self.piece_values.items():
+
+            # White pieces = positive
+            score += len(board.pieces(piece_type, chess.WHITE)) * value
+
+            # Black pieces = negative
+            score -= len(board.pieces(piece_type, chess.BLACK)) * value
+
+        return score
+
+    def minimax(self, board, depth, maximizing):
+
+        # Stop searching
+        if depth == 0 or board.is_game_over():
+            return self.evaluate_board(board)
+
+        if maximizing:
+
+            best_score = -999
+
+            for move in board.legal_moves:
+
+                board.push(move)
+
+                score = self.minimax(
+                    board,
+                    depth - 1,
+                    False
+                )
+
+                board.pop()
+
+                best_score = max(best_score, score)
+
+            return best_score
+
+        else:
+
+            best_score = 999
+
+            for move in board.legal_moves:
+
+                board.push(move)
+
+                score = self.minimax(
+                    board,
+                    depth - 1,
+                    True
+                )
+
+                board.pop()
+
+                best_score = min(best_score, score)
+
+            return best_score
+
+    def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
+        start = time.time()
+        best_move = None
+
+        maximizing = board.turn == chess.WHITE
+
+        if maximizing:
+            best_score = -999
+        else:
+            best_score = 999
+
+        for move in board.legal_moves:
+
+            board.push(move)
+
+            # Change "depth=" to match the amount of moves to look ahead
+            score = self.minimax(
+                board,
+                depth=2,
+                maximizing=not maximizing
+            )
+
+            board.pop()
+
+            if maximizing:
+
+                if score > best_score:
+                    best_score = score
+                    best_move = move
+
+            else:
+
+                if score < best_score:
+                    best_score = score
+                    best_move = move
+
+        logger.info(f"Best move: {best_move}, Score: {best_score}")
+        print("Move took:", time.time() - start)
+        return PlayResult(best_move, None)
+
+
