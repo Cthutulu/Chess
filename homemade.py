@@ -273,13 +273,11 @@ class EvaluationTest1(ExampleEngine):
 
 class EvaluationTest2(ExampleEngine):
     """
-    Simple chess bot using:
-    - Material evaluation
-    - Minimax search
-    - 3-ply lookahead
-
-    Sequence:
-    Your move -> Enemy move -> Your move -> Evaluate
+    Advanced evaluation with piece score:
+    Possetive for White, Negative for Black
+    Will evaluate and chose the best move.
+    within a ceartain number of turns.
+    depth=
     """
 
     piece_values = {
@@ -306,10 +304,10 @@ class EvaluationTest2(ExampleEngine):
 
     def minimax(self, board, depth, maximizing):
 
-        # Stop searching
         if depth == 0 or board.is_game_over():
             return self.evaluate_board(board)
 
+        # White needs possetive
         if maximizing:
 
             best_score = -999
@@ -330,6 +328,7 @@ class EvaluationTest2(ExampleEngine):
 
             return best_score
 
+        # Black needs negative
         else:
 
             best_score = 999
@@ -349,6 +348,7 @@ class EvaluationTest2(ExampleEngine):
                 best_score = min(best_score, score)
 
             return best_score
+
 
     def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
         start = time.time()
@@ -391,3 +391,56 @@ class EvaluationTest2(ExampleEngine):
         return PlayResult(best_move, None)
 
 
+
+
+#noget galt:
+
+
+
+
+
+# board.is_checkmate     -999/999  maybe
+"""
+if board.is_checkmate():
+
+    board.turn == chess.WHITE:
+        return -999
+        
+    else:
+        return 999
+        
+also with stalemate included
+"""
+
+# alpha beta pruning?
+
+# horizon effect
+
+class EvaluationTestWithCheckmate(ExampleEngine):
+    """
+    Advanced evaluation with piece score:
+    Possetive for White, Negative for Black
+    Will evaluate and chose the best move.
+    within a ceartain number of turns.
+    depth=
+    """
+
+    piece_values = {
+        chess.PAWN: 1,
+        chess.KNIGHT: 3,
+        chess.BISHOP: 3,
+        chess.ROOK: 5,
+        chess.QUEEN: 9
+    }
+
+    def evaluate_board(self, board: chess.Board):
+        score = 0
+
+        for piece_type, value in self.piece_values.items():
+            # White pieces = positive
+            score += len(board.pieces(piece_type, chess.WHITE)) * value
+
+            # Black pieces = negative
+            score -= len(board.pieces(piece_type, chess.BLACK)) * value
+
+        return score
