@@ -393,7 +393,7 @@ class EvaluationTest2(ExampleEngine):
 
 
 
-#noget galt:
+# fix horizon effect
 
 
 
@@ -404,17 +404,16 @@ class EvaluationTest2(ExampleEngine):
 if board.is_checkmate():
 
     board.turn == chess.WHITE:
-        return -999
+        return -10000
         
     else:
-        return 999
+        return 10000
         
-also with stalemate included
+stalemate included
 """
 
 # alpha beta pruning?
 
-# horizon effect
 
 class EvaluationTestWithCheckmate(ExampleEngine):
     """
@@ -423,6 +422,7 @@ class EvaluationTestWithCheckmate(ExampleEngine):
     Will evaluate and chose the best move.
     within a ceartain number of turns.
     depth=
+    And can see and avoid checkmate?
     """
 
     piece_values = {
@@ -444,3 +444,106 @@ class EvaluationTestWithCheckmate(ExampleEngine):
             score -= len(board.pieces(piece_type, chess.BLACK)) * value
 
         return score
+
+    def minimax(self, board, depth, maximizing):
+
+        if board.is_checkmate():
+
+            # White is checkmated
+            if board.turn == chess.WHITE:
+                return -10000
+
+            # Black is checkmated
+            else:
+                return 10000
+
+        if board.is_stalemate():
+            return 0
+
+        if depth == 0 or board.is_game_over():
+            return self.evaluate_board(board)
+
+        # White needs possetive
+        if maximizing:
+
+            best_score = -999
+
+            for move in board.legal_moves:
+
+                board.push(move)
+
+                score = self.minimax(
+                    board,
+                    depth - 1,
+                    False
+                )
+
+                board.pop()
+
+                best_score = max(best_score, score)
+
+            return best_score
+
+        # Black needs negative
+        else:
+
+            best_score = 999
+
+            for move in board.legal_moves:
+
+                board.push(move)
+
+                score = self.minimax(
+                    board,
+                    depth - 1,
+                    True
+                )
+
+                board.pop()
+
+                best_score = min(best_score, score)
+
+            return best_score
+
+
+    def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
+        start = time.time()
+        best_move = None
+
+        maximizing = board.turn == chess.WHITE
+
+        if maximizing:
+            best_score = -999
+        else:
+            best_score = 999
+
+        for move in board.legal_moves:
+
+            board.push(move)
+
+            # Change "depth=" to match the amount of moves to look ahead
+            score = self.minimax(
+                board,
+                depth=2,
+                maximizing=not maximizing
+            )
+
+            board.pop()
+
+            if maximizing:
+
+                if score > best_score:
+                    best_score = score
+                    best_move = move
+
+            else:
+
+                if score < best_score:
+                    best_score = score
+                    best_move = move
+
+        logger.info(f"Best move: {best_move}, Score: {best_score}")
+        print("Move took:", time.time() - start)
+        return PlayResult(best_move, None)
+
+
