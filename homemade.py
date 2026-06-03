@@ -550,6 +550,12 @@ class EvaluationTestWithCheckmate(ExampleEngine):
 
 
 class AlphaBetaPruning1(ExampleEngine):
+    """
+    https://healeycodes.com/building-my-own-chess-engine
+    https://www.youtube.com/watch?v=l-hh51ncgDI
+
+    """
+
 
     piece_values = {
         chess.PAWN: 1,
@@ -616,15 +622,10 @@ class AlphaBetaPruning1(ExampleEngine):
 
             return best_score
 
-
-        # you are here, for now finish black and search
-
-
-
         # Black needs negative
         else:
 
-            best_score = 999
+            best_score = float("inf")
 
             for move in board.legal_moves:
                 board.push(move)
@@ -632,12 +633,19 @@ class AlphaBetaPruning1(ExampleEngine):
                 score = self.minimax(
                     board,
                     depth - 1,
-                    True
+                    True,
+                    alpha,
+                    beta
                 )
 
                 board.pop()
 
                 best_score = min(best_score, score)
+
+                beta = min(beta, score)
+
+                if beta <= alpha:
+                    break
 
             return best_score
 
@@ -659,8 +667,10 @@ class AlphaBetaPruning1(ExampleEngine):
             # Change "depth=" to match the amount of moves to look ahead
             score = self.minimax(
                 board,
-                depth=2,
-                maximizing=not maximizing
+                depth=5,
+                maximizing=not maximizing,
+                alpha=float("-inf"),
+                beta=float("inf")
             )
 
             board.pop()
