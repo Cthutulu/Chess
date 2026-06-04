@@ -692,3 +692,5 @@ class AlphaBetaPruning1(ExampleEngine):
         return PlayResult(best_move, None)
 
 
+# check om koden kan "bytte" brikker, det kan være koden ikke kan lide at trade pieces, og det er derfor den laver nogle interesante moves, check how it counts score, it might look at trades as something bad
+
