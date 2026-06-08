@@ -4,7 +4,9 @@ Some example classes for people who want to create a homemade bot.
 With these classes, bot makers will not have to implement the UCI or XBoard interfaces themselves.
 """
 from inspect import AGEN_RUNNING
+import colorama
 
+from colorama import Fore, Back, Style
 import chess
 from chess.engine import PlayResult, Limit
 import random
@@ -577,7 +579,7 @@ class AlphaBetaPruning1(ExampleEngine):
         return score
 
     def minimax(self, board, depth, maximizing, alpha, beta):
-
+        self.nodes += 1
         if board.is_checkmate():
 
             # White is checkmated
@@ -599,7 +601,14 @@ class AlphaBetaPruning1(ExampleEngine):
 
             best_score = float("-inf")
 
-            for move in board.legal_moves:
+            moves = list(board.legal_moves)
+
+            moves.sort(
+                key=lambda move: board.is_capture(move),
+                reverse=True
+            )
+
+            for move in moves:
                 board.push(move)
 
                 score = self.minimax(
@@ -626,7 +635,14 @@ class AlphaBetaPruning1(ExampleEngine):
 
             best_score = float("inf")
 
-            for move in board.legal_moves:
+            moves = list(board.legal_moves)
+
+            moves.sort(
+                key=lambda move: board.is_capture(move),
+                reverse=True
+            )
+
+            for move in moves:
                 board.push(move)
 
                 score = self.minimax(
@@ -649,6 +665,7 @@ class AlphaBetaPruning1(ExampleEngine):
             return best_score
 
     def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
+        self.nodes = 0
         start = time.time()
         best_move = None
 
@@ -686,10 +703,19 @@ class AlphaBetaPruning1(ExampleEngine):
                     best_score = score
                     best_move = move
 
+        elapsed = time.time() - start
+
         logger.info(f"Best move: {best_move}, Score: {best_score}")
-        print("Move took:", time.time() - start)
+        logger.info(f"Nodes searched: {self.nodes}")
+        logger.info(Fore.YELLOW + f"Time taken: {elapsed:.2f}s", Fore.WHITE)
+        logger.info(f"Legal moves: {board.legal_moves.count()}")
         return PlayResult(best_move, None)
 
 
 # check om koden kan "bytte" brikker, det kan være koden ikke kan lide at trade pieces, og det er derfor den laver nogle interesante moves, check how it counts score, it might look at trades as something bad
-
+# off by one?
+# python colorama
+# set op et bord i endgame, med få brikker, fx kun, bonde og konge, eller noget som det, så du nemt kan regne ud, om den er korrekt, med den mængde nodes den siger
+# i fremtiden, ikke hard cappe dens dybde, men måske i stedet give den noget tid, og sige at den skal dykke så dybt den kan på den tid, eller måske et antal nodes, den ikke må gå dybere end
+# move ordering really cut the time down how?
+# transposition caching
