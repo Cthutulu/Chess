@@ -6,7 +6,7 @@ With these classes, bot makers will not have to implement the UCI or XBoard inte
 from inspect import AGEN_RUNNING
 import colorama
 
-from colorama import Fore, Back, Style
+from colorama import Fore, Back, Style, init
 import chess
 from chess.engine import PlayResult, Limit
 import random
@@ -15,6 +15,7 @@ from lib.lichess_types import MOVE, HOMEMADE_ARGS_TYPE
 import logging
 import time
 
+init(autoreset=True)
 
 
 # Use this logger variable to print messages to the console or log files.
@@ -667,26 +668,41 @@ class AlphaBetaPruning1(ExampleEngine):
     def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
         self.nodes = 0
         start = time.time()
-        best_move = None
 
         maximizing = board.turn == chess.WHITE
 
-        if maximizing:
-            best_score = -999
-        else:
-            best_score = 999
+        best_move = None
 
-        for move in board.legal_moves:
+
+
+        if maximizing:
+            best_score = float("-inf")
+        else:
+            best_score = float("inf")
+
+
+        alpha = float("-inf")
+        beta = float("inf")
+
+        moves = list(board.legal_moves)
+
+        moves.sort(
+            key=lambda move: board.is_capture(move),
+            reverse=True
+        )
+
+
+
+        for move in moves:
 
             board.push(move)
 
-            # Change "depth=" to match the amount of moves to look ahead
             score = self.minimax(
                 board,
-                depth=5,
+                depth=6,
                 maximizing=not maximizing,
-                alpha=float("-inf"),
-                beta=float("inf")
+                alpha=alpha,
+                beta=beta
             )
 
             board.pop()
@@ -697,18 +713,24 @@ class AlphaBetaPruning1(ExampleEngine):
                     best_score = score
                     best_move = move
 
+                # White has found a better move
+                alpha = max(alpha, score)
+
             else:
 
                 if score < best_score:
                     best_score = score
                     best_move = move
 
+                # Black has found a better move
+                beta = min(beta, score)
+
         elapsed = time.time() - start
 
-        logger.info(f"Best move: {best_move}, Score: {best_score}")
-        logger.info(f"Nodes searched: {self.nodes}")
-        logger.info(Fore.YELLOW + f"Time taken: {elapsed:.2f}s", Fore.WHITE)
-        logger.info(f"Legal moves: {board.legal_moves.count()}")
+        logger.info(Fore.GREEN + f"Best move: {best_move}, Score: {best_score}" + Style.RESET_ALL)
+        logger.info(Fore.CYAN + f"Nodes searched: {self.nodes}" + Style.RESET_ALL)
+        logger.info(Fore.YELLOW + f"Time taken: {elapsed:.2f}s" + Style.RESET_ALL)
+        logger.info(Fore.MAGENTA+ f"Legal moves: {board.legal_moves.count()}" + Style.RESET_ALL)
         return PlayResult(best_move, None)
 
 
