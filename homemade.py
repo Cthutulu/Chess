@@ -594,6 +594,12 @@ class AlphaBetaPruning1(ExampleEngine):
         if board.is_stalemate():
             return 0
 
+        if board.is_repetition(3):
+            if board.turn == chess.WHITE:
+                return -1
+            else:
+                return +1
+
         if depth == 0 or board.is_game_over():
             return self.evaluate_board(board)
 
@@ -604,10 +610,7 @@ class AlphaBetaPruning1(ExampleEngine):
 
             moves = list(board.legal_moves)
 
-            moves.sort(
-                key=lambda move: board.is_capture(move),
-                reverse=True
-            )
+            moves.sort(key=lambda move: board.is_capture(move), reverse=True)
 
             for move in moves:
                 board.push(move)
@@ -638,10 +641,7 @@ class AlphaBetaPruning1(ExampleEngine):
 
             moves = list(board.legal_moves)
 
-            moves.sort(
-                key=lambda move: board.is_capture(move),
-                reverse=True
-            )
+            moves.sort(key=lambda move: board.is_capture(move),reverse=True)
 
             for move in moves:
                 board.push(move)
@@ -686,10 +686,7 @@ class AlphaBetaPruning1(ExampleEngine):
 
         moves = list(board.legal_moves)
 
-        moves.sort(
-            key=lambda move: board.is_capture(move),
-            reverse=True
-        )
+        moves.sort(key=lambda move: board.is_capture(move),reverse=True)
 
 
 
@@ -699,7 +696,7 @@ class AlphaBetaPruning1(ExampleEngine):
 
             score = self.minimax(
                 board,
-                depth=6,
+                depth=5,
                 maximizing=not maximizing,
                 alpha=alpha,
                 beta=beta
@@ -735,8 +732,7 @@ class AlphaBetaPruning1(ExampleEngine):
 
 
 # check om koden kan "bytte" brikker, det kan være koden ikke kan lide at trade pieces, og det er derfor den laver nogle interesante moves, check how it counts score, it might look at trades as something bad
-# off by one?
-# python colorama
+# Piece-Square Tables
 # set op et bord i endgame, med få brikker, fx kun, bonde og konge, eller noget som det, så du nemt kan regne ud, om den er korrekt, med den mængde nodes den siger
 # i fremtiden, ikke hard cappe dens dybde, men måske i stedet give den noget tid, og sige at den skal dykke så dybt den kan på den tid, eller måske et antal nodes, den ikke må gå dybere end
 # move ordering really cut the time down how?
