@@ -553,9 +553,6 @@ class EvaluationTestWithCheckmate(ExampleEngine):
 
 class AlphaBetaPruning1(ExampleEngine):
     """
-    https://healeycodes.com/building-my-own-chess-engine
-    https://www.youtube.com/watch?v=l-hh51ncgDI
-
     """
 
 
@@ -733,7 +730,397 @@ class AlphaBetaPruning1(ExampleEngine):
 
 # check om koden kan "bytte" brikker, det kan være koden ikke kan lide at trade pieces, og det er derfor den laver nogle interesante moves, check how it counts score, it might look at trades as something bad
 # Piece-Square Tables
+# Current state > Better move ordering > Piece-square tables > Iterative deepening > Transposition table >Quiescence search
 # set op et bord i endgame, med få brikker, fx kun, bonde og konge, eller noget som det, så du nemt kan regne ud, om den er korrekt, med den mængde nodes den siger
 # i fremtiden, ikke hard cappe dens dybde, men måske i stedet give den noget tid, og sige at den skal dykke så dybt den kan på den tid, eller måske et antal nodes, den ikke må gå dybere end
 # move ordering really cut the time down how?
 # transposition caching
+
+
+class AlphaBetaPruning2(ExampleEngine):
+    """
+https://adamberent.com/piece-square-table/
+
+    """
+
+    piece_values = {
+        chess.PAWN: 1,
+        chess.KNIGHT: 3,
+        chess.BISHOP: 3,
+        chess.ROOK: 5,
+        chess.QUEEN: 9
+    }
+
+    def evaluate_board(self, board: chess.Board):
+        score = 0
+
+        for piece_type, value in self.piece_values.items():
+            # White pieces = positive
+            score += len(board.pieces(piece_type, chess.WHITE)) * value
+
+            # Black pieces = negative
+            score -= len(board.pieces(piece_type, chess.BLACK)) * value
+
+        return score
+
+
+
+
+    def minimax(self, board, depth, maximizing, alpha, beta):
+        self.nodes += 1
+        if board.is_checkmate():
+
+            # White is checkmated
+            if board.turn == chess.WHITE:
+                return -10000
+
+            # Black is checkmated
+            else:
+                return 10000
+
+        if board.is_stalemate():
+            return 0
+
+        if board.is_repetition(3):
+            if board.turn == chess.WHITE:
+                return -1
+            else:
+                return +1
+
+        if depth == 0 or board.is_game_over():
+            return self.evaluate_board(board)
+
+        # White needs possetive
+        if maximizing:
+
+            best_score = float("-inf")
+
+            moves = list(board.legal_moves)
+
+            moves.sort(key=lambda move: (board.gives_check(move),
+            self.piece_values.get(board.piece_at(move.to_square).piece_type, 0)
+            if board.is_capture(move) else 0),
+            reverse=True)
+
+            for move in moves:
+                board.push(move)
+
+                score = self.minimax(
+                    board,
+                    depth - 1,
+                    False,
+                    alpha,
+                    beta
+                )
+
+                board.pop()
+
+                best_score = max(best_score, score)
+
+                alpha = max(alpha, score)
+
+                if beta <= alpha:
+                    break
+
+            return best_score
+
+        # Black needs negative
+        else:
+
+            best_score = float("inf")
+
+            moves = list(board.legal_moves)
+
+            moves.sort(key=lambda move: (board.gives_check(move),
+            self.piece_values.get(board.piece_at(move.to_square).piece_type, 0)
+            if board.is_capture(move) else 0),
+            reverse=True)
+
+            for move in moves:
+                board.push(move)
+
+                score = self.minimax(
+                    board,
+                    depth - 1,
+                    True,
+                    alpha,
+                    beta
+                )
+
+                board.pop()
+
+                best_score = min(best_score, score)
+
+                beta = min(beta, score)
+
+                if beta <= alpha:
+                    break
+
+            return best_score
+
+    def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
+        self.nodes = 0
+        start = time.time()
+
+        maximizing = board.turn == chess.WHITE
+
+        best_move = None
+
+        if maximizing:
+            best_score = float("-inf")
+        else:
+            best_score = float("inf")
+
+        alpha = float("-inf")
+        beta = float("inf")
+
+        moves = list(board.legal_moves)
+
+        moves.sort(key=lambda move: (board.gives_check(move),
+        self.piece_values.get(board.piece_at(move.to_square).piece_type,0)
+        if board.is_capture(move) else 0),
+        reverse=True)
+
+        for move in moves:
+
+            board.push(move)
+
+            score = self.minimax(
+                board,
+                depth=5,
+                maximizing=not maximizing,
+                alpha=alpha,
+                beta=beta
+            )
+
+            board.pop()
+
+            if maximizing:
+
+                if score > best_score:
+                    best_score = score
+                    best_move = move
+
+                # White has found a better move
+                alpha = max(alpha, score)
+
+            else:
+
+                if score < best_score:
+                    best_score = score
+                    best_move = move
+
+                # Black has found a better move
+                beta = min(beta, score)
+
+        elapsed = time.time() - start
+
+        logger.info(Fore.GREEN + f"Best move: {best_move}, Score: {best_score}" + Style.RESET_ALL)
+        logger.info(Fore.CYAN + f"Nodes searched: {self.nodes}" + Style.RESET_ALL)
+        logger.info(Fore.YELLOW + f"Time taken: {elapsed:.2f}s" + Style.RESET_ALL)
+        logger.info(Fore.MAGENTA + f"Legal moves: {board.legal_moves.count()}" + Style.RESET_ALL)
+        return PlayResult(best_move, None)
+
+
+
+
+
+class PieceSquare1(ExampleEngine):
+    """
+        https://healeycodes.com/building-my-own-chess-engine
+        https://www.youtube.com/watch?v=l-hh51ncgDI
+
+        """
+
+    piece_values = {
+        chess.PAWN: 100,
+        chess.KNIGHT: 300,
+        chess.BISHOP: 300,
+        chess.ROOK: 500,
+        chess.QUEEN: 900
+    }
+
+    KNIGHT_TABLE = [
+        -5, -4, -3, -3, -3, -3, -4, -5,
+        -4, -2,  0,  0,  0,  0, -2, -4,
+        -3,  0,  1,  2,  2,  1,  0, -3,
+        -3,  1,  2,  3,  3,  2,  1, -3,
+        -3,  0,  2,  3,  3,  2,  0, -3,
+        -3,  1,  1,  2,  2,  1,  1, -3,
+        -4, -2,  0,  1,  1,  0, -2, -4,
+        -5, -4, -3, -3, -3, -3, -4, -5
+    ]
+
+    def evaluate_board(self, board: chess.Board):
+        score = 0
+
+        for piece_type, value in self.piece_values.items():
+            # White pieces = positive
+            score += len(board.pieces(piece_type, chess.WHITE)) * value
+            # Black pieces = negative
+            score -= len(board.pieces(piece_type, chess.BLACK)) * value
+
+            # Test for white knights
+            for square in board.pieces(chess.KNIGHT, chess.WHITE):
+                score += self.KNIGHT_TABLE[square]
+
+            # Test for black knights
+            for square in board.pieces(chess.KNIGHT, chess.BLACK):
+                score -= self.KNIGHT_TABLE[chess.square_mirror(square)]
+
+        return score
+
+    def minimax(self, board, depth, maximizing, alpha, beta):
+        self.nodes += 1
+        if board.is_checkmate():
+
+            # White is checkmated
+            if board.turn == chess.WHITE:
+                return -10000
+
+            # Black is checkmated
+            else:
+                return 10000
+
+        if board.is_stalemate():
+            return 0
+
+        if board.is_repetition(3):
+            if board.turn == chess.WHITE:
+                return -1
+            else:
+                return +1
+
+        if depth == 0 or board.is_game_over():
+            return self.evaluate_board(board)
+
+        # White needs possetive
+        if maximizing:
+
+            best_score = float("-inf")
+
+            moves = list(board.legal_moves)
+
+            moves.sort(key=lambda move: (board.gives_check(move),
+            self.piece_values.get(board.piece_at(move.to_square).piece_type, 0)
+            if board.is_capture(move) else 0),
+                        reverse=True)
+
+            for move in moves:
+                board.push(move)
+
+                score = self.minimax(
+                    board,
+                    depth - 1,
+                    False,
+                    alpha,
+                    beta
+                )
+
+                board.pop()
+
+                best_score = max(best_score, score)
+
+                alpha = max(alpha, score)
+
+                if beta <= alpha:
+                    break
+
+            return best_score
+
+        # Black needs negative
+        else:
+
+            best_score = float("inf")
+
+            moves = list(board.legal_moves)
+
+            moves.sort(key=lambda move: (board.gives_check(move),
+            self.piece_values.get(board.piece_at(move.to_square).piece_type, 0)
+            if board.is_capture(move) else 0),
+                        reverse=True)
+
+            for move in moves:
+                board.push(move)
+
+                score = self.minimax(
+                    board,
+                    depth - 1,
+                    True,
+                    alpha,
+                    beta
+                )
+
+                board.pop()
+
+                best_score = min(best_score, score)
+
+                beta = min(beta, score)
+
+                if beta <= alpha:
+                    break
+
+            return best_score
+
+    def search(self, board: chess.Board, *args: HOMEMADE_ARGS_TYPE) -> PlayResult:
+        self.nodes = 0
+        start = time.time()
+
+        maximizing = board.turn == chess.WHITE
+
+        best_move = None
+
+        if maximizing:
+            best_score = float("-inf")
+        else:
+            best_score = float("inf")
+
+        alpha = float("-inf")
+        beta = float("inf")
+
+        moves = list(board.legal_moves)
+
+        moves.sort(key=lambda move: (board.gives_check(move),
+        self.piece_values.get(board.piece_at(move.to_square).piece_type, 0)
+        if board.is_capture(move) else 0),
+                    reverse=True)
+
+        for move in moves:
+
+            board.push(move)
+
+            score = self.minimax(
+                board,
+                depth=5,
+                maximizing=not maximizing,
+                alpha=alpha,
+                beta=beta
+            )
+
+            board.pop()
+
+            if maximizing:
+
+                if score > best_score:
+                    best_score = score
+                    best_move = move
+
+                # White has found a better move
+                alpha = max(alpha, score)
+
+            else:
+
+                if score < best_score:
+                    best_score = score
+                    best_move = move
+
+                # Black has found a better move
+                beta = min(beta, score)
+
+        elapsed = time.time() - start
+
+        logger.info(Fore.GREEN + f"Best move: {best_move}, Score: {best_score}" + Style.RESET_ALL)
+        logger.info(Fore.CYAN + f"Nodes searched: {self.nodes}" + Style.RESET_ALL)
+        logger.info(Fore.YELLOW + f"Time taken: {elapsed:.2f}s" + Style.RESET_ALL)
+        logger.info(Fore.MAGENTA + f"Legal moves: {board.legal_moves.count()}" + Style.RESET_ALL)
+        return PlayResult(best_move, None)
