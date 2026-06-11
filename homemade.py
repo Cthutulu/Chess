@@ -548,7 +548,32 @@ class EvaluationTestWithCheckmate(ExampleEngine):
         print("Move took:", time.time() - start)
         return PlayResult(best_move, None)
 
+"""
+def move_order_score(self, board: chess.Board, move: chess.Move):
+        check_bonus = board.gives_check(move)
 
+        capture_value = 0
+
+        if board.is_capture(move):
+            if board.is_en_passant(move):
+                capture_value = self.piece_values[chess.PAWN]
+            else:
+                captured = board.piece_at(move.to_square)
+                if captured:
+                    capture_value = self.piece_values.get(
+                        captured.piece_type,
+                        0
+                    )
+
+        return (check_bonus, capture_value)
+        
+        
+        
+        moves.sort(
+    key=lambda move: self.move_order_score(board, move),
+    reverse=True
+)
+"""
 
 
 class AlphaBetaPruning1(ExampleEngine):
@@ -736,6 +761,10 @@ class AlphaBetaPruning1(ExampleEngine):
 # move ordering really cut the time down how?
 # transposition caching
 
+# Test for black knights
+            # for square in board.pieces(chess.KNIGHT, chess.BLACK):
+                # score -= self.KNIGHT_TABLE[chess.square_mirror(square)]
+
 
 class AlphaBetaPruning2(ExampleEngine):
     """
@@ -763,6 +792,13 @@ https://adamberent.com/piece-square-table/
 
         return score
 
+
+    def move_order(self, board, move, ):
+        board.gives_check(move)
+
+        # if move = is_en_passant()
+        # else self.piece_values.get(board.piece_at(move.to_square).piece_type, 0)
+        pass
 
 
 
@@ -963,10 +999,6 @@ class PieceSquare1(ExampleEngine):
             # Test for white knights
             for square in board.pieces(chess.KNIGHT, chess.WHITE):
                 score += self.KNIGHT_TABLE[square]
-
-            # Test for black knights
-            for square in board.pieces(chess.KNIGHT, chess.BLACK):
-                score -= self.KNIGHT_TABLE[chess.square_mirror(square)]
 
         return score
 
