@@ -549,30 +549,10 @@ class EvaluationTestWithCheckmate(ExampleEngine):
         return PlayResult(best_move, None)
 
 """
-def move_order_score(self, board: chess.Board, move: chess.Move):
-        check_bonus = board.gives_check(move)
-
-        capture_value = 0
-
-        if board.is_capture(move):
-            if board.is_en_passant(move):
-                capture_value = self.piece_values[chess.PAWN]
-            else:
-                captured = board.piece_at(move.to_square)
-                if captured:
-                    capture_value = self.piece_values.get(
-                        captured.piece_type,
-                        0
-                    )
-
-        return (check_bonus, capture_value)
-        
-        
-        
-        moves.sort(
-    key=lambda move: self.move_order_score(board, move),
-    reverse=True
-)
+moves.sort(key=lambda move: (board.gives_check(move),
+            self.piece_values.get(board.piece_at(move.to_square).piece_type, 0)
+            if board.is_capture(move) else 0),
+            reverse=True)
 """
 
 
@@ -777,7 +757,8 @@ https://adamberent.com/piece-square-table/
         chess.KNIGHT: 3,
         chess.BISHOP: 3,
         chess.ROOK: 5,
-        chess.QUEEN: 9
+        chess.QUEEN: 9,
+        chess.KING: 0
     }
 
     def evaluate_board(self, board: chess.Board):
@@ -792,13 +773,32 @@ https://adamberent.com/piece-square-table/
 
         return score
 
+    def move_order_score(self, board, move):
 
-    def move_order(self, board, move, ):
-        board.gives_check(move)
+        score = 0
 
-        # if move = is_en_passant()
-        # else self.piece_values.get(board.piece_at(move.to_square).piece_type, 0)
-        pass
+        if move.promotion:
+            score += 10000
+
+        if board.gives_check(move):
+            score += 2000
+
+        if board.is_capture(move):
+
+            # En passant
+            if board.is_en_passant(move):
+                score += 1000
+
+            # normal captures
+            else:
+
+                attacker = board.piece_at(move.from_square)
+                captured = board.piece_at(move.to_square)
+
+                if attacker and captured:
+                    score += (self.piece_values[captured.piece_type] * 10 - self.piece_values[attacker.piece_type])
+
+        return score
 
 
 
@@ -833,10 +833,10 @@ https://adamberent.com/piece-square-table/
 
             moves = list(board.legal_moves)
 
-            moves.sort(key=lambda move: (board.gives_check(move),
-            self.piece_values.get(board.piece_at(move.to_square).piece_type, 0)
-            if board.is_capture(move) else 0),
-            reverse=True)
+            moves.sort(
+                key=lambda move: self.move_order_score(board, move),
+                reverse=True
+            )
 
             for move in moves:
                 board.push(move)
@@ -867,10 +867,10 @@ https://adamberent.com/piece-square-table/
 
             moves = list(board.legal_moves)
 
-            moves.sort(key=lambda move: (board.gives_check(move),
-            self.piece_values.get(board.piece_at(move.to_square).piece_type, 0)
-            if board.is_capture(move) else 0),
-            reverse=True)
+            moves.sort(
+                key=lambda move: self.move_order_score(board, move),
+                reverse=True
+            )
 
             for move in moves:
                 board.push(move)
@@ -912,10 +912,10 @@ https://adamberent.com/piece-square-table/
 
         moves = list(board.legal_moves)
 
-        moves.sort(key=lambda move: (board.gives_check(move),
-        self.piece_values.get(board.piece_at(move.to_square).piece_type,0)
-        if board.is_capture(move) else 0),
-        reverse=True)
+        moves.sort(
+            key=lambda move: self.move_order_score(board, move),
+            reverse=True
+        )
 
         for move in moves:
 
