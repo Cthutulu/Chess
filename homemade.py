@@ -753,11 +753,11 @@ https://adamberent.com/piece-square-table/
     """
 
     piece_values = {
-        chess.PAWN: 1,
-        chess.KNIGHT: 3,
-        chess.BISHOP: 3,
-        chess.ROOK: 5,
-        chess.QUEEN: 9,
+        chess.PAWN: 100,
+        chess.KNIGHT: 300,
+        chess.BISHOP: 300,
+        chess.ROOK: 500,
+        chess.QUEEN: 900,
         chess.KING: 0
     }
 
