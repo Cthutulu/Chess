@@ -801,7 +801,6 @@ https://adamberent.com/piece-square-table/
         return score
 
 
-
     def minimax(self, board, depth, maximizing, alpha, beta):
         self.nodes += 1
         if board.is_checkmate():
@@ -916,6 +915,12 @@ https://adamberent.com/piece-square-table/
             key=lambda move: self.move_order_score(board, move),
             reverse=True
         )
+        logger.info(Fore.RED + "Top 3 move ordering scores:")
+
+        for move in moves[:3]:
+            logger.info(
+                Fore.RED + f"{move} -> {self.move_order_score(board, move)}" + Style.RESET_ALL
+            )
 
         for move in moves:
 
