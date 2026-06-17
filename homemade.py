@@ -142,7 +142,7 @@ class AgressiveCheckMove(ExampleEngine):
         return PlayResult(chosen_move, None)
 # endregion AgressiveCheckMove
 
-
+# region SmartAggressiveMove
 class SmartAggressiveMove(ExampleEngine):
     """Prioritize valuable captures and checks."""
 
@@ -207,8 +207,9 @@ class SmartAggressiveMove(ExampleEngine):
         chosen_move = random.choice(legal_moves)
         logger.info(f"Random move played: {chosen_move}")
         return PlayResult(chosen_move, None)
+# endregion SmartAggressiveMove
 
-
+# region EvaluationTest1
 class EvaluationTest1(ExampleEngine):
     """Simple evaluation with piece score:
        Possetive for White, Negative for Black
@@ -271,8 +272,9 @@ class EvaluationTest1(ExampleEngine):
         logger.info(f"Best move: {best_move}, Score: {best_score}")
 
         return PlayResult(best_move, None)
+# endregion EvaluationTest1
 
-
+# region EvaluationTest2
 class EvaluationTest2(ExampleEngine):
     """
     Advanced evaluation with piece score:
@@ -391,32 +393,14 @@ class EvaluationTest2(ExampleEngine):
         logger.info(f"Best move: {best_move}, Score: {best_score}")
         print("Move took:", time.time() - start)
         return PlayResult(best_move, None)
-
+# endregion EvaluationTest2
 
 
 
 # fix horizon effect
-
-
-
-
-
-# board.is_checkmate     -999/999  maybe
-"""
-if board.is_checkmate():
-
-    board.turn == chess.WHITE:
-        return -10000
-        
-    else:
-        return 10000
-        
-stalemate included
-"""
-
 # alpha beta pruning?
 
-
+#region EvaluationTestWithCheckmate
 class EvaluationTestWithCheckmate(ExampleEngine):
     """
     Advanced evaluation with piece score:
@@ -526,7 +510,7 @@ class EvaluationTestWithCheckmate(ExampleEngine):
             # Change "depth=" to match the amount of moves to look ahead
             score = self.minimax(
                 board,
-                depth=2,
+                depth=6,
                 maximizing=not maximizing
             )
 
@@ -547,6 +531,7 @@ class EvaluationTestWithCheckmate(ExampleEngine):
         logger.info(f"Best move: {best_move}, Score: {best_score}")
         print("Move took:", time.time() - start)
         return PlayResult(best_move, None)
+# endregion EvaluationTestWithCheckmate
 
 """
 moves.sort(key=lambda move: (board.gives_check(move),
@@ -555,7 +540,7 @@ moves.sort(key=lambda move: (board.gives_check(move),
             reverse=True)
 """
 
-
+# region AlphaBetaPruning1
 class AlphaBetaPruning1(ExampleEngine):
     """
     """
@@ -731,6 +716,7 @@ class AlphaBetaPruning1(ExampleEngine):
         logger.info(Fore.YELLOW + f"Time taken: {elapsed:.2f}s" + Style.RESET_ALL)
         logger.info(Fore.MAGENTA+ f"Legal moves: {board.legal_moves.count()}" + Style.RESET_ALL)
         return PlayResult(best_move, None)
+# endregion AlphaBetaPruning1
 
 
 # check om koden kan "bytte" brikker, det kan være koden ikke kan lide at trade pieces, og det er derfor den laver nogle interesante moves, check how it counts score, it might look at trades as something bad
@@ -745,7 +731,7 @@ class AlphaBetaPruning1(ExampleEngine):
             # for square in board.pieces(chess.KNIGHT, chess.BLACK):
                 # score -= self.KNIGHT_TABLE[chess.square_mirror(square)]
 
-
+# region AlphaBetaPruning2
 class AlphaBetaPruning2(ExampleEngine):
     """
 https://adamberent.com/piece-square-table/
@@ -956,6 +942,7 @@ https://adamberent.com/piece-square-table/
         logger.info(Fore.YELLOW + f"Time taken: {elapsed:.2f}s" + Style.RESET_ALL)
         logger.info(Fore.MAGENTA + f"Legal moves: {board.legal_moves.count()}" + Style.RESET_ALL)
         return PlayResult(best_move, None)
+# endregion AlphaBetaPruning2
 
 
 
