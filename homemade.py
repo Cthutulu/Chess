@@ -741,14 +741,11 @@ class AlphaBetaPruning1(ExampleEngine):
 # move ordering really cut the time down how?
 # transposition caching
 
-# Test for black knights
-            # for square in board.pieces(chess.KNIGHT, chess.BLACK):
-                # score -= self.KNIGHT_TABLE[chess.square_mirror(square)]
-
-
+# region AlphaBetaPruning2
 class AlphaBetaPruning2(ExampleEngine):
     """
 https://adamberent.com/piece-square-table/
+
 
     """
 
@@ -961,7 +958,7 @@ https://adamberent.com/piece-square-table/
         logger.info(Fore.YELLOW + f"Time taken: {elapsed:.2f}s" + Style.RESET_ALL)
         logger.info(Fore.MAGENTA + f"Legal moves: {board.legal_moves.count()}" + Style.RESET_ALL)
         return PlayResult(best_move, None)
-
+# endregion AlphaBetaPruning2
 
 
 
@@ -978,8 +975,20 @@ class PieceSquare1(ExampleEngine):
         chess.KNIGHT: 300,
         chess.BISHOP: 300,
         chess.ROOK: 500,
-        chess.QUEEN: 900
+        chess.QUEEN: 900,
+        chess.KING: 0
     }
+
+    PAWN_TABLE = [
+        0,  0,  0,  0,  0,  0,  0,  0,
+        5,  5,  5,  5,  5,  5,  5,  5,
+        1,  1,  2,  3,  3,  2,  1,  1,
+        0,  0,  1,  2,  2,  1,  0,  0,
+        0,  0,  0,  2,  2,  0,  0,  0,
+        1, -1, -2,  0,  0, -2, -1,  1,
+        1,  2,  2, -2, -2,  2,  2,  1,
+        0,  0,  0,  0,  0,  0,  0,  0
+    ]
 
     KNIGHT_TABLE = [
         -5, -4, -3, -3, -3, -3, -4, -5,
@@ -992,6 +1001,24 @@ class PieceSquare1(ExampleEngine):
         -5, -4, -3, -3, -3, -3, -4, -5
     ]
 
+    BISHOP_TABLE = [
+        -4, -2, -2, -2, -2, -2, -2, -4,
+        -2,  0,  0,  0,  0,  0,  0, -2,
+    ]
+
+    ROOK_TABLE = [
+
+    ]
+
+    QUEEN_TABLE = [
+
+    ]
+
+    KING_TABLE = [
+
+    ]
+
+
     def evaluate_board(self, board: chess.Board):
         score = 0
 
@@ -1001,9 +1028,48 @@ class PieceSquare1(ExampleEngine):
             # Black pieces = negative
             score -= len(board.pieces(piece_type, chess.BLACK)) * value
 
-            # Test for white knights
+            # Test for white
+            for square in board.pieces(chess.PAWN, chess.WHITE):
+                score += self.PAWN_TABLE[square]
             for square in board.pieces(chess.KNIGHT, chess.WHITE):
                 score += self.KNIGHT_TABLE[square]
+            for square in board.pieces(chess.BISHOP, chess.WHITE):
+                score += self.BISHOP_TABLE[square]
+            for square in board.pieces(chess.ROOK, chess.WHITE):
+                score += self.ROOK_TABLE[square]
+            for square in board.pieces(chess.QUEEN, chess.WHITE):
+                score += self.QUEEN_TABLE[square]
+            for square in board.pieces(chess.KING, chess.WHITE):
+                score += self.KING_TABLE[square]
+
+            # for square in board.pieces(chess.KNIGHT, chess.BLACK):
+                # score -= self.KNIGHT_TABLE[chess.square_mirror(square)]
+        return score
+
+    def move_order_score(self, board, move):
+
+        score = 0
+
+        if move.promotion:
+            score += 10000
+
+        if board.gives_check(move):
+            score += 2000
+
+        if board.is_capture(move):
+
+            # En passant
+            if board.is_en_passant(move):
+                score += 1000
+
+            # normal captures
+            else:
+
+                attacker = board.piece_at(move.from_square)
+                captured = board.piece_at(move.to_square)
+
+                if attacker and captured:
+                    score += (self.piece_values[captured.piece_type] * 10 - self.piece_values[attacker.piece_type])
 
         return score
 
@@ -1038,10 +1104,10 @@ class PieceSquare1(ExampleEngine):
 
             moves = list(board.legal_moves)
 
-            moves.sort(key=lambda move: (board.gives_check(move),
-            self.piece_values.get(board.piece_at(move.to_square).piece_type, 0)
-            if board.is_capture(move) else 0),
-                        reverse=True)
+            moves.sort(
+                key=lambda move: self.move_order_score(board, move),
+                reverse=True
+            )
 
             for move in moves:
                 board.push(move)
@@ -1072,10 +1138,10 @@ class PieceSquare1(ExampleEngine):
 
             moves = list(board.legal_moves)
 
-            moves.sort(key=lambda move: (board.gives_check(move),
-            self.piece_values.get(board.piece_at(move.to_square).piece_type, 0)
-            if board.is_capture(move) else 0),
-                        reverse=True)
+            moves.sort(
+                key=lambda move: self.move_order_score(board, move),
+                reverse=True
+            )
 
             for move in moves:
                 board.push(move)
@@ -1117,10 +1183,10 @@ class PieceSquare1(ExampleEngine):
 
         moves = list(board.legal_moves)
 
-        moves.sort(key=lambda move: (board.gives_check(move),
-        self.piece_values.get(board.piece_at(move.to_square).piece_type, 0)
-        if board.is_capture(move) else 0),
-                    reverse=True)
+        moves.sort(
+            key=lambda move: self.move_order_score(board, move),
+            reverse=True
+        )
 
         for move in moves:
 
