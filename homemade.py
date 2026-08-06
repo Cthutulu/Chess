@@ -741,6 +741,9 @@ class AlphaBetaPruning1(ExampleEngine):
 # move ordering really cut the time down how?
 # transposition caching
 
+ # for square in board.pieces(chess.KNIGHT, chess.BLACK):
+                # score -= self.KNIGHT_TABLE[chess.square_mirror(square)]
+
 # region AlphaBetaPruning2
 class AlphaBetaPruning2(ExampleEngine):
     """
@@ -991,31 +994,59 @@ class PieceSquare1(ExampleEngine):
     ]
 
     KNIGHT_TABLE = [
-        -5, -4, -3, -3, -3, -3, -4, -5,
-        -4, -2,  0,  0,  0,  0, -2, -4,
-        -3,  0,  1,  2,  2,  1,  0, -3,
-        -3,  1,  2,  3,  3,  2,  1, -3,
-        -3,  0,  2,  3,  3,  2,  0, -3,
-        -3,  1,  1,  2,  2,  1,  1, -3,
-        -4, -2,  0,  1,  1,  0, -2, -4,
-        -5, -4, -3, -3, -3, -3, -4, -5
+       -5, -4, -3, -3, -3, -3, -4, -5,
+       -4, -2,  0,  0,  0,  0, -2, -4,
+       -3,  0,  1,  2,  2,  1,  0, -3,
+       -3,  1,  2,  3,  3,  2,  1, -3,
+       -3,  0,  2,  3,  3,  2,  0, -3,
+       -3,  1,  1,  2,  2,  1,  1, -3,
+       -4, -2,  0,  1,  1,  0, -2, -4,
+       -5, -4, -3, -3, -3, -3, -4, -5
     ]
 
     BISHOP_TABLE = [
-        -4, -2, -2, -2, -2, -2, -2, -4,
-        -2,  0,  0,  0,  0,  0,  0, -2,
+       -2, -1, -1, -1, -1, -1, -1, -2,
+       -1,  0,  0,  0,  0,  0,  0, -1,
+       -1,  0,  1,  1,  1,  1,  0, -1,
+       -1,  1,  1,  2,  2,  1,  1, -1,
+       -1,  0,  2,  2,  2,  2,  0, -1,
+       -1,  2,  2,  2,  2,  2,  2, -1,
+       -1,  1,  0,  0,  0,  0,  1, -1,
+       -2, -1, -1, -1, -1, -1, -1, -2
     ]
 
     ROOK_TABLE = [
-
+        0,  0,  0,  1,  1,  0,  0,  0,
+       -1,  0,  0,  0,  0,  0,  0, -1,
+       -1,  0,  0,  0,  0,  0,  0, -1,
+       -1,  0,  0,  0,  0,  0,  0, -1,
+       -1,  0,  0,  0,  0,  0,  0, -1,
+       -1,  0,  0,  0,  0,  0,  0, -1,
+        2,  2,  2,  2,  2,  2,  2,  2,
+        0,  0,  0,  0,  0,  0,  0,  0
     ]
 
     QUEEN_TABLE = [
-
+       -2, -1, -1,  0,  0, -1, -1, -2,
+       -1,  0,  0,  0,  0,  0,  0, -1,
+       -1,  0,  1,  1,  1,  1,  0, -1,
+        0,  1,  1,  2,  2,  1,  1,  0,
+        0,  1,  2,  2,  2,  2,  1,  0,
+       -1,  1,  2,  2,  2,  2,  1, -1,
+       -1,  0,  1,  1,  1,  1,  0, -1,
+       -2, -1, -1,  0,  0, -1, -1, -2
     ]
 
     KING_TABLE = [
-
+        [],
+       [-3, -4, -4, -5, -5, -4, -4, -3],
+       [-3, -4, -4, -5, -5, -4, -4, -3],
+       [-3, -4, -4, -5, -5, -4, -4, -3],
+       [-3, -4, -4, -5, -5, -4, -4, -3],
+       [-2, -3, -3, -4, -4, -3, -3, -2],
+       [-1, -2, -2, -2, -2, -2, -2, -1],
+       [ 2,  2,  0,  0,  0,  0,  2,  2],
+       [ 2,  3,  1,  0,  0,  1,  3,  2]
     ]
 
 
@@ -1042,8 +1073,6 @@ class PieceSquare1(ExampleEngine):
             for square in board.pieces(chess.KING, chess.WHITE):
                 score += self.KING_TABLE[square]
 
-            # for square in board.pieces(chess.KNIGHT, chess.BLACK):
-                # score -= self.KNIGHT_TABLE[chess.square_mirror(square)]
         return score
 
     def move_order_score(self, board, move):
